@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rashtrasant Tukadoji Maharaj Nagpur University (RTMNU) Live Scopus Intelligence Dashboard</title>
+  <meta name="description" content="Rashtrasant Tukadoji Maharaj Nagpur University Live Scopus Intelligence Dashboard - Executive Research Intelligence & Accreditation Surveillance Portal (NIRF: IR-O-U-0320 | Scopus AF-ID: 60015668 | ⭐ NAAC A)" />
+  <link rel="icon" href="Rashtrasant_Tukadoji_Maharaj_Nagpur_University_logo.webp" type="image/webp" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Plotly.js for interactive analytics charts -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <!-- =========================================================
+       INSTITUTIONAL HEADER (#0D111A Deep Navy)
+       ========================================================= -->
+  <header class="institutional-header">
+    <div class="header-left">
+      <button id="btn-mobile-sidebar-toggle" class="btn-mobile-filter-toggle" aria-label="Open Filter Panel">
+        <span>☰</span>
+        <span>Filters</span>
+      </button>
+      <div class="header-logos">
+        <img src="icare_logo.png" alt="ICARE Logo" class="header-logo-img" onerror="this.src='ICARE - Logo.png'" />
+        <img src="rtmnu_logo.png" alt="RTMNU University Crest" class="header-crest-img" onerror="this.src='Rashtrasant_Tukadoji_Maharaj_Nagpur_University_logo.webp'" />
+      </div>
+      <div class="header-title-block">
+        <div class="header-inst-name">RASHTRASANT TUKADOJI MAHARAJ NAGPUR UNIVERSITY &bull; LIVE SCOPUS INTELLIGENCE</div>
+        <div class="header-sub-tagline">
+          <span>NIRF: IR-O-U-0320</span> &bull; 
+          <span>Scopus AF-ID: <strong class="code-pill">60015668</strong></span> &bull; 
+          <em>Centenary State University (Estd. 1923) &bull; ⭐ NAAC A</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="live-feed-badge">
+        <span class="pulse-dot"></span>
+        <span>Live Scopus Feed &bull; Synced 60m</span>
+      </div>
+
+      <div class="header-theme-toggle">
+        <button id="theme-light-btn" class="theme-toggle-btn active" title="Light Mode">☀️ Light</button>
+        <button id="theme-dark-btn" class="theme-toggle-btn" title="Dark Mode">🌙 Dark</button>
+      </div>
+
+      <button id="btn-reset-dashboard" class="btn-header-reset" title="Reset all filters to defaults">
+        <span>🔄</span> Reset
+      </button>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- =========================================================
+         SIDEBAR: RESEARCH INTELLIGENCE FILTERS
+         ========================================================= -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-mobile-header">
+        <span style="font-weight: 800; font-size: 0.85rem; color: var(--primary-blue); text-transform: uppercase;">
+          Filters &amp; Controls
+        </span>
+        <button id="btn-sidebar-close" class="btn-sidebar-close" aria-label="Close Filters">✕</button>
+      </div>
+
+      <div class="sidebar-header-box">
+        <div class="sidebar-title">
+          <span>🧭</span> RESEARCH INTELLIGENCE FILTERS
+        </div>
+        <div class="sidebar-desc">Multi-dimensional bibliometric surveillance</div>
+      </div>
+
+      <!-- Evaluation Period Filter -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <span>Evaluation Period</span>
+          <span class="filter-hint">1950 - 2026</span>
+        </div>
+        <div class="year-input-grid">
+          <div>
+            <label style="font-size: 0.68rem; color: var(--text-muted); display: block; margin-bottom: 2px;">Start Year</label>
+            <input type="number" id="input-start-year" class="form-input" min="1950" max="2026" value="1950" />
+          </div>
+          <div>
+            <label style="font-size: 0.68rem; color: var(--text-muted); display: block; margin-bottom: 2px;">End Year</label>
+            <input type="number" id="input-end-year" class="form-input" min="1950" max="2026" value="2026" />
+          </div>
+        </div>
+        <button id="btn-apply-years" class="btn-apply-years">Apply Year Range</button>
+      </div>
+
+      <!-- Department Filter -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <span>🏛️ Academic Department / School</span>
+        </div>
+        <div class="multiselect-container" id="dept-multiselect">
+          <div class="multiselect-box" id="dept-box">
+            <span class="placeholder">All Academic Departments</span>
+          </div>
+          <div class="multiselect-menu" id="dept-menu">
+            <!-- Populated dynamically with RTMNU depts -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Journal Quartile Filter -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <span>⭐ Journal Quartile (Q1-Q4)</span>
+        </div>
+        <div class="multiselect-container" id="quartile-multiselect">
+          <div class="multiselect-box" id="quartile-box">
+            <span class="placeholder">All Quartiles</span>
+          </div>
+          <div class="multiselect-menu" id="quartile-menu">
+            <div class="multiselect-option" data-value="Q1">Q1 (Highest Tier 25%)</div>
+            <div class="multiselect-option" data-value="Q2">Q2 (Upper Middle 25-50%)</div>
+            <div class="multiselect-option" data-value="Q3">Q3 (Lower Middle 50-75%)</div>
+            <div class="multiselect-option" data-value="Q4">Q4 (Bottom Tier 25%)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collaboration Scope Filter -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <span>🌐 Collaboration Scope</span>
+        </div>
+        <div class="multiselect-container" id="collab-multiselect">
+          <div class="multiselect-box" id="collab-box">
+            <span class="placeholder">All Collaboration Types</span>
+          </div>
+          <div class="multiselect-menu" id="collab-menu">
+            <div class="multiselect-option" data-value="International">International Collaboration</div>
+            <div class="multiselect-option" data-value="Industry">Industry / Corporate R&amp;D</div>
+            <div class="multiselect-option" data-value="National">Domestic / Institutional Only</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keyword Search -->
+      <div class="filter-group">
+        <div class="filter-label">
+          <span>🔍 Keyword / Title / Author:</span>
+        </div>
+        <input type="text" id="input-search-query" class="form-input" placeholder="e.g. Nanoparticles, Deshmukh, LIT, Catalyst..." />
+      </div>
+
+      <!-- Scopus Gateway & API Sync Accordion -->
+      <div class="sidebar-accordion" id="accordion-gateway">
+        <div class="accordion-header" id="accordion-gateway-header">
+          <span>📡 Scopus Gateway &amp; API Sync</span>
+          <span id="gateway-caret">▼</span>
+        </div>
+        <div class="accordion-content">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="pipeline_mode" value="benchmark" checked />
+            <span>Benchmark Verified (2,500 RTMNU Records)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="radio" name="pipeline_mode" value="live" />
+            <span>Live Scopus Cache (API Sync)</span>
+          </label>
+          <div style="font-size: 0.70rem; color: var(--text-muted); margin-top: 4px;">
+            Status: <strong id="gateway-status" style="color: var(--color-success);">Online &amp; Active</strong>
+          </div>
+          <button id="btn-trigger-sync" class="btn-action" style="width: 100%; justify-content: center; margin-top: 4px;">
+            🔄 Trigger API Sync
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer-note">
+        <strong>Rashtrasant Tukadoji Maharaj Nagpur University</strong><br />
+        Centenary State University (Estd. 1923)<br />
+        NIRF ID: <strong>IR-O-U-0320</strong> &bull; Scopus AF-ID: <span style="color: var(--primary-blue); font-weight: 700;">60015668</span><br />
+        Accreditation: <strong>⭐ NAAC A</strong>
+      </div>
+    </aside>
+
+    <!-- =========================================================
+         MAIN CONTENT REGION
+         ========================================================= -->
+    <main class="main-content">
+      <!-- INSTITUTIONAL HERO SECTION -->
+      <section class="institutional-hero">
+        <div class="hero-identity-badges">
+          <span class="inst-badge badge-heritage">🏛️ Centenary State University &bull; Estd. 1923</span>
+          <span class="inst-badge badge-inst-blue">⭐ NAAC Accredited Grade A</span>
+          <span class="inst-badge badge-subtle">📜 NIRF Category: University (IR-O-U-0320)</span>
+          <span class="inst-badge badge-subtle">🔬 Scopus AF-ID: 60015668</span>
+          <span class="inst-badge badge-subtle">🏆 Scopus Research Dossier</span>
+        </div>
+
+        <div class="hero-content-row">
+          <div class="hero-title-area">
+            <h1 class="hero-inst-headline">Rashtrasant Tukadoji Maharaj Nagpur University Live Scopus Intelligence Dashboard</h1>
+            <div class="hero-tagline-motto">
+              Elsevier Scopus Bibliometrics, Citation Accrual &amp; Global Academic Impact Surveillance
+            </div>
+            <div class="hero-brand-philosophy">
+              CENTENARY EXCELLENCE &bull; RESEARCH TRANSFORMATION &bull; KNOWLEDGE LEADERSHIP
+            </div>
+          </div>
+          <div class="hero-exec-statbox">
+            <div class="statbox-label">TOTAL SCOPUS OUTPUT</div>
+            <div class="statbox-number" id="hero-stat-pubs">2,500</div>
+            <div class="statbox-citations" id="hero-stat-cites">192,851 Citations Accrued</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORT ACTION TOOLBAR -->
+      <div class="report-toolbar">
+        <div class="toolbar-title">
+          <span>📊</span>
+          <span>EXECUTIVE REPORT: Institutional Research Dossier &amp; Accreditation Metrics</span>
+        </div>
+        <div class="toolbar-actions">
+          <button id="btn-export-excel" class="btn-action">📥 Export Excel (.xlsx)</button>
+          <button id="btn-export-bibtex" class="btn-action btn-action-outline">📄 Export BibTeX (.bib)</button>
+          <button id="btn-print-dash" class="btn-action btn-action-outline">🖨️ Print Dossier</button>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           TOP 10 EXECUTIVE KPI CARDS (4-Column Desktop Grid)
+           ========================================================= -->
+      <div class="kpi-grid-4col">
+        <!-- Card 1 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">TOTAL SCOPUS OUTPUT</span>
+            <div class="kpi-icon">🏆</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-total-output">0</div>
+          <div class="kpi-sub-badge">All indexed publications</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">PUBLICATIONS - 2026</span>
+            <div class="kpi-icon">📈</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-vol-2026">0</div>
+          <div class="kpi-sub-badge">Current calendar year (Live)</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">PUBLICATIONS - 2025</span>
+            <div class="kpi-icon">📅</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-vol-2025">0</div>
+          <div class="kpi-sub-badge">Preceding academic year</div>
+        </div>
+
+        <!-- Card 4 (Orange Highlight Metric) -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">TOTAL CITATIONS</span>
+            <div class="kpi-icon">⭐</div>
+          </div>
+          <div class="kpi-metric-number highlight-orange" id="kpi-total-cites">0</div>
+          <div class="kpi-sub-badge accent-orange">Cumulative global impact</div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">CITATIONS PER PUB (CPP)</span>
+            <div class="kpi-icon">🎯</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-cpp">0.00</div>
+          <div class="kpi-sub-badge">Average citation density</div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">Q1 PUBLICATIONS</span>
+            <div class="kpi-icon">🏅</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-q1-pubs">0</div>
+          <div class="kpi-sub-badge" id="kpi-q1-pct">0.0% top-tier journals</div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">INTERNATIONAL COLLAB</span>
+            <div class="kpi-icon">🌐</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-intl-count">0</div>
+          <div class="kpi-sub-badge" id="kpi-intl-pct">0.0% global co-authors</div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">INDUSTRY COLLAB</span>
+            <div class="kpi-icon">🏢</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-ind-count">0</div>
+          <div class="kpi-sub-badge" id="kpi-ind-pct">0.0% corporate R&amp;D</div>
+        </div>
+
+        <!-- Card 9 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">ACTIVE PUBLISHING FACULTY</span>
+            <div class="kpi-icon">👥</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-active-authors">0</div>
+          <div class="kpi-sub-badge">Unique contributing authors</div>
+        </div>
+
+        <!-- Card 10 -->
+        <div class="exec-kpi-card">
+          <div class="kpi-card-header">
+            <span class="kpi-label">PUBS IN LAST 30 DAYS</span>
+            <div class="kpi-icon">⚡</div>
+          </div>
+          <div class="kpi-metric-number" id="kpi-velocity-30d">0</div>
+          <div class="kpi-sub-badge">Recent publication velocity</div>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           INSTITUTIONAL ANALYTICS NAVIGATION TABS
+           ========================================================= -->
+      <nav class="tabs-analytics-nav" id="main-tabs-nav">
+        <button class="tab-nav-btn active" data-tab="tab-trends">📈 Trends</button>
+        <button class="tab-nav-btn" data-tab="tab-impact">🎯 Impact</button>
+        <button class="tab-nav-btn" data-tab="tab-collab">🌐 Collaboration</button>
+        <button class="tab-nav-btn" data-tab="tab-quality">🏆 Quality</button>
+        <button class="tab-nav-btn" data-tab="tab-authors">👥 Authors</button>
+        <button class="tab-nav-btn" data-tab="tab-feed">⚡ Live Feed</button>
+        <button class="tab-nav-btn" data-tab="tab-copilot">🤖 AI Copilot</button>
+      </nav>
+
+      <!-- =========================================================
+           TAB 1: 📈 TRENDS
+           ========================================================= -->
+      <section class="tab-panel active" id="tab-trends">
+        <div class="grid-7-5">
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div>
+                <div class="card-title">Annual Publication Output &amp; Cumulative Trajectory</div>
+                <div class="card-subtitle">Year-on-year indexing volume alongside cumulative academic output</div>
+              </div>
+            </div>
+            <div id="chart-annual-growth" class="chart-container"></div>
+          </div>
+
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div>
+                <div class="card-title">Monthly Publishing Velocity</div>
+                <div class="card-subtitle">Indexed volume distribution across calendar months</div>
+              </div>
+              <div>
+                <select id="select-velocity-year" class="form-select" style="width: auto; padding: 4px 8px; font-size: 0.76rem;">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+            </div>
+            <div id="chart-monthly-velocity" class="chart-container"></div>
+          </div>
+        </div>
+
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div>
+              <div class="card-title">Citations Per Paper (CPP) Evolution</div>
+              <div class="card-subtitle">Historical citations maturation curve indicating research longevity</div>
+            </div>
+          </div>
+          <div id="chart-cpp-evolution" class="chart-container" style="min-height: 280px;"></div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 2: 🎯 IMPACT
+           ========================================================= -->
+      <section class="tab-panel" id="tab-impact">
+        <div class="section-headline-bar">
+          <div>
+            <div class="section-headline-title">Citation Dynamics &amp; Academic Impact</div>
+            <div class="section-headline-sub">Accumulation trajectories, departmental citations, and landmark publication records</div>
+          </div>
+          <span class="inst-badge badge-inst-blue">CITATIONS INTELLIGENCE</span>
+        </div>
+
+        <div class="grid-2col">
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Annual Citation Accrual Curve</div>
+            </div>
+            <div id="chart-citation-accrual" class="chart-container"></div>
+          </div>
+
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Top Academic Departments by Citation Volume</div>
+            </div>
+            <div id="chart-dept-citations" class="chart-container"></div>
+          </div>
+        </div>
+
+        <!-- Landmark Papers Table -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div>
+              <div class="card-title">Landmark Research Publications (Top 20 Cited)</div>
+              <div class="card-subtitle">Highest impact papers across RTMNU with live DOI linkage</div>
+            </div>
+            <button id="btn-export-landmark-bib" class="btn-action btn-action-outline">📥 Export Landmark BibTeX</button>
+          </div>
+
+          <div class="table-container">
+            <table class="inst-data-table" id="table-landmark-papers">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Publication Title</th>
+                  <th>Lead Author</th>
+                  <th>Department</th>
+                  <th>Journal / Venue</th>
+                  <th>Year</th>
+                  <th>Citations</th>
+                  <th>Tier</th>
+                  <th>DOI Link</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-landmark-papers">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 3: 🌐 COLLABORATION
+           ========================================================= -->
+      <section class="tab-panel" id="tab-collab">
+        <div class="section-headline-bar">
+          <div>
+            <div class="section-headline-title">Global &amp; Industrial Collaboration Landscape</div>
+            <div class="section-headline-sub">International co-authorship geography, partner nations, and corporate R&amp;D linkages</div>
+          </div>
+          <span class="inst-badge badge-inst-blue">PARTNERSHIPS</span>
+        </div>
+
+        <div class="grid-7-5">
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">International Collaboration World Map</div>
+            </div>
+            <div id="chart-collab-map" class="chart-container"></div>
+          </div>
+
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Top 10 International Partner Nations</div>
+            </div>
+            <div id="chart-top-countries" class="chart-container"></div>
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Institutional Research Hierarchy (Treemap: Department &rarr; Quartile)</div>
+            </div>
+            <div id="chart-collab-treemap" class="chart-container"></div>
+          </div>
+
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Industry R&amp;D Collaboration Rate by Department</div>
+            </div>
+            <div id="chart-industry-collab" class="chart-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 4: 🏆 QUALITY & BENCHMARKS
+           ========================================================= -->
+      <section class="tab-panel" id="tab-quality">
+        <div class="section-headline-bar">
+          <div>
+            <div class="section-headline-title">Accreditation Quality &amp; Academic Benchmarking</div>
+            <div class="section-headline-sub">Journal quartile distribution, quadrant bubble matrix, and multi-axis department radar</div>
+          </div>
+          <span class="inst-badge badge-heritage">NAAC / NIRF BENCHMARK</span>
+        </div>
+
+        <div class="grid-5-7">
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Journal Quartile Profile (Scimago / JCR)</div>
+            </div>
+            <div id="chart-quartile-donut" class="chart-container"></div>
+          </div>
+
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Impact vs. Volume Quadrant Matrix (Bubble Scale = Total Citations)</div>
+            </div>
+            <div id="chart-quadrant-bubble" class="chart-container"></div>
+          </div>
+        </div>
+
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div>
+              <div class="card-title">Department Multi-Dimensional Radar Benchmark</div>
+              <div class="card-subtitle">Comparative evaluation across Volume, Citations, CPP, Q1 %, and Intl Collab %</div>
+            </div>
+          </div>
+          <div id="chart-dept-radar" class="chart-container"></div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 5: 👥 AUTHORS
+           ========================================================= -->
+      <section class="tab-panel" id="tab-authors">
+        <div class="section-headline-bar">
+          <div>
+            <div class="section-headline-title">Faculty Research Intelligence &amp; Academic Dossier</div>
+            <div class="section-headline-sub">Faculty laureate podium, deep-dive profiles, and isolated executive dossier printing</div>
+          </div>
+          <span class="inst-badge badge-inst-blue">FACULTY DOSSIER</span>
+        </div>
+
+        <!-- Faculty Laureate Podium -->
+        <div style="font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.90rem; margin-bottom: 10px; color: var(--text-primary);">
+          Faculty Research Laureate Podium (Top 3 Publication Volume)
+        </div>
+        <div class="podium-grid" id="faculty-podium-container">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Collapsible Full Leaderboard Table -->
+        <div class="sidebar-accordion open" style="margin-bottom: 20px; background: var(--card-solid);">
+          <div class="accordion-header" id="leaderboard-accordion-toggle">
+            <span>📋 Complete Faculty Research Leaderboard (Top 50 Authors)</span>
+            <span>▼</span>
+          </div>
+          <div class="accordion-content" style="display: flex;">
+            <div class="table-container">
+              <table class="inst-data-table" id="table-faculty-leaderboard">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Faculty Member</th>
+                    <th>Academic Department</th>
+                    <th>Scopus Papers</th>
+                    <th>Total Citations</th>
+                    <th>CPP</th>
+                    <th>h-Index</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-faculty-leaderboard">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Faculty Selector Bar -->
+        <div style="font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.90rem; margin-bottom: 8px;">
+          Select Faculty Member for Executive Dossier Inspection:
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+          <select id="select-faculty-member" class="form-select" style="flex: 1; min-width: 260px;">
+            <!-- Populated dynamically -->
+          </select>
+          <button id="btn-print-faculty-profile" class="btn-action">🖨️ Print Dossier</button>
+        </div>
+
+        <!-- Author Profile Header Card -->
+        <div class="faculty-dossier-card" id="author-dossier-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text-primary);" id="auth-header-name">
+                Faculty Member
+              </div>
+              <div style="font-size: 0.86rem; font-weight: 600; color: var(--primary-blue); margin-top: 2px;" id="auth-header-dept">
+                🏛️ Academic Department &bull; Rashtrasant Tukadoji Maharaj Nagpur University
+              </div>
+            </div>
+            <div>
+              <span class="inst-badge badge-inst-blue">● SCOPUS VERIFIED RESEARCHER (AF-ID: 60015668)</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
+            <span class="inst-badge badge-heritage" id="auth-chip-q1">⭐ 0 Q1 Publications</span>
+            <span class="inst-badge badge-inst-blue" id="auth-chip-intl">🌐 0.0% International Co-authorship</span>
+            <span class="inst-badge badge-subtle" id="auth-chip-ind">🏢 0.0% Industry R&amp;D</span>
+            <span class="inst-badge badge-subtle" id="auth-chip-coauthors">👥 0 Co-Authors</span>
+          </div>
+        </div>
+
+        <!-- Author 5 KPI Chips Row -->
+        <div class="kpi-grid-4col" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;">
+          <div class="exec-kpi-card">
+            <div class="kpi-card-header"><span class="kpi-label">Scopus Papers</span><span>📚</span></div>
+            <div class="kpi-metric-number" id="auth-kpi-papers">0</div>
+            <div class="kpi-sub-badge">Indexed papers</div>
+          </div>
+          <div class="exec-kpi-card">
+            <div class="kpi-card-header"><span class="kpi-label">Total Citations</span><span>💎</span></div>
+            <div class="kpi-metric-number highlight-orange" id="auth-kpi-citations">0</div>
+            <div class="kpi-sub-badge accent-orange">Citation volume</div>
+          </div>
+          <div class="exec-kpi-card">
+            <div class="kpi-card-header"><span class="kpi-label">Cites / Paper</span><span>🎯</span></div>
+            <div class="kpi-metric-number" id="auth-kpi-cpp">0.00</div>
+            <div class="kpi-sub-badge">Average CPP</div>
+          </div>
+          <div class="exec-kpi-card">
+            <div class="kpi-card-header"><span class="kpi-label">Scopus h-Index</span><span>🏆</span></div>
+            <div class="kpi-metric-number" id="auth-kpi-hindex">h-0</div>
+            <div class="kpi-sub-badge">H-Core metric</div>
+          </div>
+          <div class="exec-kpi-card">
+            <div class="kpi-card-header"><span class="kpi-label">Q1 Ratio</span><span>⭐</span></div>
+            <div class="kpi-metric-number" id="auth-kpi-q1ratio">0%</div>
+            <div class="kpi-sub-badge" id="auth-kpi-q1sub">0 Q1 papers</div>
+          </div>
+        </div>
+
+        <!-- Author Velocity and Quartile Charts -->
+        <div class="grid-7-5">
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Annual Output &amp; Cumulative Velocity</div>
+            </div>
+            <div id="chart-author-velocity" class="chart-container"></div>
+          </div>
+
+          <div class="analytics-card">
+            <div class="analytics-card-header">
+              <div class="card-title">Author Journal Quartile Distribution</div>
+            </div>
+            <div id="chart-author-quartile" class="chart-container"></div>
+          </div>
+        </div>
+
+        <!-- Top 5 Landmark Publications by Author -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div class="card-title" id="auth-top5-heading">Top 5 Landmark Publications by Faculty</div>
+            <button id="btn-export-author-bib" class="btn-action btn-action-outline">📥 Export Author BibTeX</button>
+          </div>
+          <div class="table-container">
+            <table class="inst-data-table" id="table-author-top5">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Publication Title</th>
+                  <th>Journal / Venue</th>
+                  <th>Year</th>
+                  <th>Citations</th>
+                  <th>Tier</th>
+                  <th>DOI Link</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-author-top5">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 6: ⚡ LIVE FEED (SEARCH & EXPORT)
+           ========================================================= -->
+      <section class="tab-panel" id="tab-feed">
+        <div class="section-headline-bar">
+          <div>
+            <div class="section-headline-title">Live Research Feed &amp; Bibliographic Repository</div>
+            <div class="section-headline-sub">Full-text searchable publication records with live DOI navigation, Excel and BibTeX exports</div>
+          </div>
+          <span class="inst-badge badge-inst-blue">RESEARCH REPOSITORY</span>
+        </div>
+
+        <div class="grid-7-5" style="align-items: center; margin-bottom: 14px;">
+          <div>
+            <label style="font-size: 0.74rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 4px;">
+              Search repository by title, author, journal, or department:
+            </label>
+            <input type="text" id="input-feed-search" class="form-input" placeholder="Type keyword e.g. Formulation, Wasewar, Biotechnology, 2026..." />
+          </div>
+          <div>
+            <label style="font-size: 0.74rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 4px;">
+              Display Rows Limit:
+            </label>
+            <select id="select-feed-limit" class="form-select">
+              <option value="50">50 records</option>
+              <option value="100" selected>100 records</option>
+              <option value="250">250 records</option>
+              <option value="500">500 records</option>
+              <option value="all">All Records</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-feed-export-excel" class="btn-action">📊 Export Excel (.xlsx)</button>
+            <button id="btn-feed-export-bib" class="btn-action btn-action-outline">📑 Export BibTeX (.bib)</button>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-secondary);" id="feed-count-indicator">
+            Displaying <strong>0</strong> of <strong>0</strong> filtered documents
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="inst-data-table" id="table-live-feed">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Publication Title</th>
+                <th>Lead Author</th>
+                <th>Academic Department</th>
+                <th>Journal / Source</th>
+                <th>Year</th>
+                <th>Citations</th>
+                <th>Tier</th>
+                <th>DOI Link</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-live-feed">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           TAB 7: 🤖 AI COPILOT
+           ========================================================= -->
+      <section class="tab-panel" id="tab-copilot">
+        <div class="copilot-container">
+          <div class="copilot-header">
+            <div>
+              <div class="copilot-title">🤖 RTMNU Scopus Intelligence AI Copilot</div>
+              <div class="copilot-subtitle">Ask questions about Rashtrasant Tukadoji Maharaj Nagpur University research metrics.</div>
+            </div>
+            <span class="inst-badge badge-inst-blue" style="background: rgba(255,255,255,0.1); color: #FFF; border-color: rgba(255,255,255,0.2);">
+              IN-BUILT ANALYTICS ENGINE
+            </span>
+          </div>
+
+          <div class="chat-messages-box" id="copilot-messages-box">
+            <!-- Initial Welcome Message populated by JS -->
+          </div>
+
+          <!-- Prompt Chips -->
+          <div class="copilot-chips-bar">
+            <button class="prompt-chip-btn" data-prompt="📊 Executive Dossier">📊 Executive Dossier</button>
+            <button class="prompt-chip-btn" data-prompt="🏛️ Dept Rankings">🏛️ Dept Rankings</button>
+            <button class="prompt-chip-btn" data-prompt="🏆 Q1 Quality Analysis">🏆 Q1 Quality Analysis</button>
+            <button class="prompt-chip-btn" data-prompt="👥 Top Authors">👥 Top Authors</button>
+            <button class="prompt-chip-btn" id="btn-clear-chat" style="margin-left: auto; border-color: var(--border-color); color: var(--text-secondary);">
+              🗑️ Clear Chat
+            </button>
+          </div>
+
+          <!-- Chat Input Bar -->
+          <div class="chat-input-bar">
+            <input type="text" id="copilot-input" class="form-input" placeholder="Ask AI Copilot about RTMNU research, departments, authors, or citations..." />
+            <button id="btn-copilot-send" class="btn-chat-send">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSTITUTIONAL FOOTER -->
+      <footer class="institutional-footer">
+        <strong>Rashtrasant Tukadoji Maharaj Nagpur University (RTMNU) Live Scopus Intelligence Dashboard</strong> &bull;
+        Scopus Affiliation ID: AF-ID(60015668) &bull; NIRF ID: IR-O-U-0320 &bull; ⭐ NAAC A<br />
+        Centenary State University (Estd. 1923) &bull; Powered by ICARE Research Intelligence Portal &bull; Built with HTML5 &amp; Plotly
+      </footer>
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Data Script -->
+  <script src="data.js"></script>
+  <!-- Application Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>
