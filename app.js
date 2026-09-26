@@ -1835,10 +1835,6 @@ I am your institutional research intelligence assistant powered directly by the 
         if (targetPanel) targetPanel.classList.add("active");
         state.activeTab = targetId;
 
-        if (btn.scrollIntoView) {
-          btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-        }
-
         renderAll();
         window.dispatchEvent(new Event("resize"));
       });
@@ -1887,45 +1883,8 @@ I am your institutional research intelligence assistant powered directly by the 
     const printDashBtn = document.getElementById("btn-print-dash");
     if (printDashBtn) {
       printDashBtn.addEventListener("click", () => {
-        const tabNames = {
-          "tab-trends": "Annual Output, Growth Trajectory & Publishing Velocity",
-          "tab-impact": "Citation Dynamics, Departmental Impact & Landmark Papers",
-          "tab-collab": "Global Collaboration & International Co-Authorship",
-          "tab-quality": "Journal Quality, Quartile Benchmarks & Percentiles",
-          "tab-authors": "Faculty Leadership, Laureates & Researcher Dossier",
-          "tab-feed": "Live Scopus Publication Feed",
-          "tab-copilot": "Research Intelligence AI Copilot Analytics"
-        };
-        const activeTabId = state.activeTab || "tab-trends";
-        const sectionTitle = tabNames[activeTabId] || "Executive Research Report";
-
-        // Update the print letterhead banner
-        const printTitleEl = document.getElementById("print-active-tab-title");
-        if (printTitleEl) {
-          printTitleEl.textContent = `SECTION INTELLIGENCE REPORT: ${sectionTitle.toUpperCase()}`;
-        }
-
-        const printDateEl = document.getElementById("print-current-date");
-        if (printDateEl) {
-          const now = new Date();
-          printDateEl.textContent = `Generated: ${now.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} • Live Scopus Surveillance`;
-        }
-
-        // Set dynamic document title so PDF save dialog names the file cleanly
-        const origTitle = document.title;
-        document.title = `RTMNU_Scopus_Report_${activeTabId.replace("tab-", "")}_${new Date().toISOString().slice(0, 10)}`;
-
-        showToast(`Preparing ${sectionTitle} report for PDF / Print...`, "🖨️");
-
-        // Ensure active Plotly charts fit printable width
-        window.dispatchEvent(new Event("resize"));
-
-        setTimeout(() => {
-          window.print();
-          setTimeout(() => {
-            document.title = origTitle;
-          }, 1000);
-        }, 300);
+        showToast("Preparing executive printable dossier...", "🖨️");
+        setTimeout(() => window.print(), 250);
       });
     }
 
@@ -2062,13 +2021,11 @@ I am your institutional research intelligence assistant powered directly by the 
     function openMobileSidebar() {
       if (appSidebar) appSidebar.classList.add("open");
       if (sidebarBackdrop) sidebarBackdrop.classList.add("active");
-      document.body.style.overflow = "hidden";
     }
 
     function closeMobileSidebar() {
       if (appSidebar) appSidebar.classList.remove("open");
       if (sidebarBackdrop) sidebarBackdrop.classList.remove("active");
-      document.body.style.overflow = "";
     }
 
     if (mobileToggleBtn) mobileToggleBtn.addEventListener("click", openMobileSidebar);
@@ -2077,7 +2034,7 @@ I am your institutional research intelligence assistant powered directly by the 
 
     // Responsive Plotly chart resize on resize and orientation change
     let resizeTimer;
-    function resizeAllCharts() {
+    window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         const chartIds = [
@@ -2094,11 +2051,6 @@ I am your institutional research intelligence assistant powered directly by the 
           }
         });
       }, 150);
-    }
-
-    window.addEventListener("resize", resizeAllCharts);
-    window.addEventListener("orientationchange", () => {
-      setTimeout(resizeAllCharts, 250);
     });
   }
 
